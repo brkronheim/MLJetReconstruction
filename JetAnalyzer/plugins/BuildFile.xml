@@ -9,5 +9,5 @@
 <use name="PhysicsTools/UtilAlgos"/>
 <use name="DataFormats/VertexReco"/>
 <use name="DataFormats/PatCandidates"/>
-<use name="JetNtupleProducerTool/JetAnalyzer"/>
+<use name="MLJetReconstruction/JetAnalyzer"/>
 <flags EDM_PLUGIN="1"/>

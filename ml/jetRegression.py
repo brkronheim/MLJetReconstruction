@@ -18,7 +18,7 @@ tf.random.set_seed(3)
 
 #Define some parameters for the network
 inputFileName = "mlDataNoDupsClean.npy"
-outputModelName = "jet_regression_big_fixed_phi_no_dups2
+outputModelName = "jet_regression_big_fixed_phi_no_dups2"
 
 width = 50
 alpha = 0.2

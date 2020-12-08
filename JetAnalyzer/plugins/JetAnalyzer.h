@@ -43,9 +43,9 @@
 #include "TH1D.h"
 #include "TH2D.h"
 
-#include "JetNtupleProducerTool/JetAnalyzer/interface/jetConstructor.h"
-#include "JetNtupleProducerTool/JetAnalyzer/interface/regression.h"
-#include "JetNtupleProducerTool/JetAnalyzer/interface/classifier.h"
+#include "MLJetReconstruction/JetAnalyzer/interface/jetConstructor.h"
+#include "MLJetReconstruction/JetAnalyzer/interface/regression.h"
+#include "MLJetReconstruction/JetAnalyzer/interface/classifier.h"
 
 using namespace std;
 using namespace reco;

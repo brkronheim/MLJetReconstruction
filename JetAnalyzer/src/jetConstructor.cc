@@ -1,6 +1,6 @@
-#include "JetNtupleProducerTool/JetAnalyzer/interface/jetConstructor.h"
-#include "JetNtupleProducerTool/JetAnalyzer/interface/regression.h"
-#include "JetNtupleProducerTool/JetAnalyzer/interface/classifier.h"
+#include "MLJetReconstruction/JetAnalyzer/interface/jetConstructor.h"
+#include "MLJetReconstruction/JetAnalyzer/interface/regression.h"
+#include "MLJetReconstruction/JetAnalyzer/interface/classifier.h"
 //#include "classifier.h"
 
 #include <iostream>
@@ -10,14 +10,9 @@
 
 
 jetConstructor::jetConstructor() {
-     //regression regressionNet = regression("/home/cmsusr/CMSSW_10_6_8_patch1/src/JetNtupleProducer/JetAnalyzer/data/regression");
-     //classifier classifierNet = classifier("/home/cmsurs/CMSSW_10_6_8_patch1/src/JetNtupleProducer/JetAnalyzer/data/classification");
-     std::cout << "Making jetConstructor" << std::endl;
+    std::cout << "Making jetConstructor" << std::endl;
 }
 
-//jetConstructor::~jetConstructor() {
-//    //dtor
-//}
 
 int jetConstructor::run(float ** particles, int particleCount, float ** outputJets){ //
     std::cout << "Number of particles given:" << particleCount << std::endl;

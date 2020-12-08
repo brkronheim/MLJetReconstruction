@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 
-#include "JetNtupleProducerTool/JetAnalyzer/interface/classifier.h"
+#include "MLJetReconstruction/JetAnalyzer/interface/classifier.h"
 
 classifier::classifier(std::string fileName)
 {

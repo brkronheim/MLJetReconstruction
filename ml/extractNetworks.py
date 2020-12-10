@@ -18,9 +18,9 @@ from sklearn.model_selection import train_test_split
 
 
 @click.command()
-@click.option('--filename', default="gitParticleData", help='name of file to fix')
-@click.option('--regression', default="gitParticleData", help='name of file to fix')
-@click.option('--classification', default="gitParticleData", help='name of file to fix')
+@click.option('--filename', default="gitParticleData.npy", help='name of data file for normalization info')
+@click.option('--regression', default="gitRegression1", help='name of fregression network')
+@click.option('--classification', default="gitClassification1", help='name of classification network')
 
 def main(filename, regression, classification):
     

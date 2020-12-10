@@ -1,32 +1,42 @@
+""" 
+Converts a text file output by the C++ code into a .npy file where the particles in a jet are sorted by pT
+"""
+
+import click
 import numpy as np
 import matplotlib.pyplot as plt
 
-fileName = "mlDataNoDups"
+@click.command()
+@click.option('--filename', default="gitParticleData", help='name of file to fix')
 
-data = np.loadtxt(fileName + ".txt")
-np.save(fileName + "npy", data)
+def main(filename):
+    dataInitial=np.load(filename + ".npy")
+    data=[]
 
-dataInitial=np.load(fileName + ".npy")
-data=[]
+    temp=[]
+    val = []
+    
+    for x in range(len(dataInitial)):
+        if(dataInitial[x,0]==1):
+            sortedArray=np.argsort(np.array(val))
+            real=False
+            for y in range(len(val)):
+                newVal=temp[sortedArray[len(val)-1-y]]
+                newVal[0]=0
+                if(not real):
+                    if(newVal[1]!=0.0 or newVal[2]!=0.0 or newVal[3]!=0.0 or newVal[4]!=0.0 or newVal[5]!=0.0):
+                        real=True
+                        newVal[0]=1
+                    
+                if(real):
+                    data.append(newVal)
+            temp=[]
+            val=[]
+        temp.append(dataInitial[x,:])
+        val.append((dataInitial[x,6]**2+dataInitial[x,7]**2)**0.5)
+    dataInitial=np.array(data)   
 
-temp=[]
-
-for x in range(len(dataInitial)): # Iterate over all the data
-    if(dataInitial[x,0]==1): # Check if this is the start of a new jet  
-        sortedArray=np.argsort(np.array(val)) #Sort the old jet by pT
-        real=False
-        for y in range(len(val)):
-            newVal=temp[sortedArray[len(val)-1-y]]
-            newVal[0]=0
-            if(not real): # Find first reco particle with a matching fen particle, otherwise remove
-                if(newVal[1]!=0.0 or newVal[2]!=0.0 or newVal[3]!=0.0 or newVal[4]!=0.0 or newVal[5]!=0.0):
-                    real=True
-                    newVal[0]=1
-                    if(len(data)<1000):
-                        print("new", len(data))#, newVal) 
-            if(real):
-                data.append(newVal)
-                
-dataInitial=np.array(data)   
-
-np.save(fileName + "Clean.npy", dataInitial)
+    np.save(filename + "Clean.npy", dataInitial)
+    
+if(__name__=="__main__"):
+    main()

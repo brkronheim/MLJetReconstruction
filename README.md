@@ -13,17 +13,47 @@ cd MLJetReconstruction/JetAnalyzer
 
 ## Running the code
 
-To run the code simply execute.
+The first code that should be run is the generation of the gen-reco particle matching dataset. This is done through the c++ code and can be executed as
 ```
-cmsRun python/ConfFile_cfg.py
+cmsRun python/ConfFile_cfg.py executionMode=1
 ```
-As currently setup, the code will make predictions using the the jet reconstruction algorithm and generate a dataset with these predictions. In order to change this to produce a dataset with the initial training data. Replace JetAnalyzer.cc in plugins with AltJetAnalyzer.cc in misc (change the name to JetAnalyzer.cc). Also, change filelist.txt in JetAnalyer/python to contain
-root://eospublic.cern.ch///eos/opendata/cms/MonteCarlo2016/RunIISummer16MiniAODv2/QCD_Pt-15to7000_TuneCUETP8M1_Flat_13TeV_pythia8/MINIAODSIM/PUMoriond17_magnetOn_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/08278E4E-E4EF-E611-8BD7-FA163E3ABA64.root
-Then, recomplie the code and run it. It will generate a text file mlData.txt. This can be transformed into an appropriate file for training by cleanParticleData.py in ml. The file output can then be used in jetClassification.py and jetRegression.py to produce the classification and regression networks used in the C++ code. ExtractNetworks.ipynb contains the code necesary to extract the data necesary to run the networks in C++. rocPlots.ipynb contains code to view the quality of the regression predictions. 
+This tells the c++ code to use the first and smaller dataset to generate the gen-reco matches. It will save the data to mlData.txt. This should be transfered to the Python work area. Once there, run cleanParticleData.py as 
+```
+python cleanParticleData.py --filename=filename
+```
+where filename is whatever the mlData.txt file was saved as after the transfer. Do not include the .txt ending. The data in the file will be reordered so that within each jet the particles are orderd by descending gen pt. Additionally, it will be saved in a .npy file.
 
-Running the code in its default configuration with 
-root://eospublic.cern.ch///eos/opendata/cms/MonteCarlo2016/RunIISummer16MiniAODv2/QCD_Pt-15to7000_TuneCUETP8M1_Flat_13TeV_pythia8/MINIAODSIM/PUMoriond17_magnetOn_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/0C0A7523-6AEF-E611-BFEE-002590494E64.root 
-in filelist.txt will generate predictions using the ml algorithm to a text file mlData.txt. Convert this into a .npy file and then you can train a network to perform corrections on it using jetCorrection.py. Finally, viewPredictions.ipynb can be used to view some histograms showing the performance of the network.
+After this, the first two networks can be trained. Do this using the code
+```
+python jetClassification.py
+python jetRegression.py
+```
+Note that both of these files have command line options which can be accessed with the --help flag. The defaults though are the values used currently.
+
+Once these networks have been trained they need to be extracted using extracteNetworks.py. Run
+```
+python extractNetworks.py --filename=filename --regression=regression --classification=classification
+```
+Here filename is the name of the data file used to train the two networks, regression is the name of the regression network, and classification is the name of the classifcation network. This will store the weights and biases for the networks in a folder called classification and one called regression. The data contained therein should be transfered to the similarly names folders in JetAnalyzer/data. The data currently there is what you get from training with the default options.
+
+You can make next some plots showing how the classifier performs in rocPlots.ipynb.
+
+Once this has been done, run the c++ code again to actually make predictions using the ml algorithm. It will use the regression and classification networks previously trained to determine how to assemble the jet. Run the code by doing
+```
+cmsRun python/ConfFile_cfg.py executionMode=1
+```
+This will use a second, larger data file as its source. 
+
+Once done with this, transfer the mlData.txt file as done previously. This file needs to be converted to a .npy file. The easiest way to do this is to execute the first three cells in performancePlots.ipynb, with the optional code uncommented. 
+
+After this, train the last neural network by executing
+
+```
+python jetCorrection.py
+```
+Again, other options are availabe through --help
+
+After this, you can either run the code in performancePlots.ipynb with the networks trained and the data already obtained, or you can run the c++ code in executionMode=2 to obtain a test set. This code will make a plot of performance plots, though it is still giving strange results for the final correction.
 
 Beyond this, extractHistos.cc can be used to generate some Root Histograms showing how the matching process between gen and reco particles works, and extractHistos2.cc will make some histograms showing the algorithms performance. They are executed by running the following commands in the docker instance:
 

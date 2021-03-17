@@ -6,3 +6,5 @@ When tasked with learning multiple dimensions x, y, z, given data D, the network
 In quantileNetwork.py are three important pieces of code, the QuantileNetwork Model, a makeDataset function, and a callNet function. The model's function is clear enough, but makeDataset is used to turn a normal ml dataset into a quantile one, and callNet is used to make actual predictions.
 
 The file trainQuantileNet.py contains code to actually train a network, and useQuantileNet.py contains code to make predictions from that network. Note that is demonstrates an issue with the networks, when given insufficient data and a rapidly varying function, it will assume the variance is noise. This may not actual be a failing, but it is a fact of the model.
+
+For an interesting paper dealing with a version of quantile networks for generating distributions, see  https://arxiv.org/pdf/1806.05575.pdf

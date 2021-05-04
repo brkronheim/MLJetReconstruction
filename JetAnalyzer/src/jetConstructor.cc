@@ -15,7 +15,7 @@ jetConstructor::jetConstructor() {
 
 
 int jetConstructor::run(float ** particles, int particleCount, float ** outputJets){ //
-    std::cout << "Number of particles given:" << particleCount << std::endl;
+    //std::cout << "Number of particles given:" << particleCount << std::endl;
 	int jetCount = 0;
     //int matchedParticles = 0;
     int remainingParticles = particleCount;
@@ -64,9 +64,9 @@ int jetConstructor::run(float ** particles, int particleCount, float ** outputJe
         int particlesAdded=0;
         //std::cout << std::endl;
         for(int x = 0; x<remainingParticles; x++){
-			if(false && jetCount + x < 100){
-				std::cout << "Current particle number"<< jetCount + x << std::endl;
-            }
+			//if(false && jetCount + x < 100){
+			//	std::cout << "Current particle number"<< jetCount + x << std::endl;
+            //}
 			currentParticle = *(particles + jetCount + x);
 
             //Extract necesary information from currentParticle, add it to inputVector
@@ -80,17 +80,17 @@ int jetConstructor::run(float ** particles, int particleCount, float ** outputJe
                 classifierNet.predict(&inputVector[0], &classificationOutput[0], 1);
                 if(x==0 || classificationOutput[0]==1.0){
                     
-					for(int y = 7; y<15; y++){
-						std::cout << *( inputVector + y) << ", ";
-					}
-					std::cout << std::endl;
+					//for(int y = 7; y<15; y++){
+					//	std::cout << *( inputVector + y) << ", ";
+					//}
+					//std::cout << std::endl;
 					
 					regressionNet.predict(&inputVector[0], &regressionOutput[0], 1);
-                    for(int y = 0; y<4; y++){
-                        std::cout << regressionOutput[y] << ", ";
-                    }
-                    std::cout << std::endl;
-					std::cout << std::endl;
+                    //for(int y = 0; y<4; y++){
+                    //    std::cout << regressionOutput[y] << ", ";
+                    //}
+                    //std::cout << std::endl;
+		    //			std::cout << std::endl;
                     *(currentJet+0) = regressionOutput[0];
                     *(currentJet+1) = regressionOutput[1];
                     *(currentJet+2) = regressionOutput[2];

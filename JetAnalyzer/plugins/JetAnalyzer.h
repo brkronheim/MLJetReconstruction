@@ -1,3 +1,4 @@
+
 #ifndef JetAnalyzer_included
 #define JetAnalyzer_included 1
 
@@ -141,8 +142,7 @@ class JetAnalyzer : public edm::EDAnalyzer {
         std::string t_qgtagger;
 
         TFile* outputFile;
-        TTree* jetTree;
-
+        
         jetConstructor constructJets = jetConstructor();
 		//std::string strRegression = "/home/cmsusr/CMSSW_10_6_8_patch1/src/JetNtupleProducer/JetAnalyzer/data/regression";
      	//std::string strClassifier = "/home/cmsusr/CMSSW_10_6_8_patch1/src/JetNtupleProducer/JetAnalyzer/data/classification";
@@ -271,6 +271,8 @@ class JetAnalyzer : public edm::EDAnalyzer {
 		unsigned long long  correctParticlesNotInReco;
 		unsigned long long  incorrectParticlesInReco;
 		unsigned long long  incorrectParticlesNotInReco;
+		
+		int executionMode;
 
 };
 

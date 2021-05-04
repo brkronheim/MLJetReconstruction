@@ -23,7 +23,8 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig):
     qglToken_(consumes<edm::ValueMap<float>>(edm::InputTag("QGTagger", "qgLikelihood"))),
     ptDToken_(consumes<edm::ValueMap<float>>(edm::InputTag("QGTagger", "ptD"))),
     axis2Token_(consumes<edm::ValueMap<float>>(edm::InputTag("QGTagger", "axis2"))),
-    multToken_(consumes<edm::ValueMap<int>>(edm::InputTag("QGTagger", "mult")))
+    multToken_(consumes<edm::ValueMap<int>>(edm::InputTag("QGTagger", "mult"))),
+	executionMode (iConfig.getUntrackedParameter<int>("executionMode"))
 {
     goodVtxNdof = iConfig.getParameter<double>("confGoodVtxNdof");
     goodVtxZ = iConfig.getParameter<double>("confGoodVtxZ");
@@ -103,161 +104,6 @@ void JetAnalyzer::beginJob()
 	fullAlgJetPT150_200 = fs->make<TH1D>("fullAlgJetPT150_200" , "PT of jets with uncorrected reco PT between 150 and 155" , 100 , 0 , 300);
 	
 	
-	// Create the ROOT tree and add all the branches to it
-    jetTree = fs->make<TTree>("jetTree", "jetTree");
-
-    jetTree->Branch("jetPt", &jetPt, "jetPt/F");
-    jetTree->Branch("jetEta", &jetEta, "jetEta/F");
-    jetTree->Branch("jetPhi", &jetPhi, "jetPhi/F");
-    jetTree->Branch("jetMass", &jetMass, "jetMass/F");
-    jetTree->Branch("jetGirth", &jetGirth, "jetGirth/F");
-    jetTree->Branch("jetArea", &jetArea, "jetArea/F");
-
-    jetTree->Branch("jetRawPt", &jetRawPt, "jetRawPt/F");
-    jetTree->Branch("jetRawMass", &jetRawMass, "jetRawMass/F");
-
-    jetTree->Branch("jetLooseID", &jetLooseID, "jetLooseID/I");
-    jetTree->Branch("jetTightID", &jetTightID, "jetTightID/I");
-    jetTree->Branch("jetGenMatch", &jetGenMatch, "jetGenMatch/I");
-
-    jetTree->Branch("jetQGl", &jetQGl, "jetQGl/F");
-    jetTree->Branch("QG_ptD", &QG_ptD, "QG_ptD/F");
-    jetTree->Branch("QG_axis2", &QG_axis2, "QG_axis2/F");
-    jetTree->Branch("QG_mult", &QG_mult, "QG_mult/I");
-
-    jetTree->Branch("partonFlav", &partonFlav, "partonFlav/I");
-    jetTree->Branch("hadronFlav", &hadronFlav, "hadronFlav/I");
-    jetTree->Branch("physFlav", &physFlav, "physFlav/I");
-
-    jetTree->Branch("isPhysUDS", &isPhysUDS, "isPhysUDS/I");
-    jetTree->Branch("isPhysG", &isPhysG, "isPhysG/I");
-    jetTree->Branch("isPhysOther", &isPhysOther, "isPhysOther/I");
-    jetTree->Branch("isPartonUDS", &isPartonUDS, "isPartonUDS/I");
-    jetTree->Branch("isPartonG", &isPartonG, "isPartonG/I");
-    jetTree->Branch("isPartonOther", &isPartonOther, "isPartonOther/I");
-
-    jetTree->Branch("jetChargedHadronMult", &jetChargedHadronMult, "jetChargedHadronMult/I");
-    jetTree->Branch("jetNeutralHadronMult", &jetNeutralHadronMult, "jetNeutralHadronMult/I");
-    jetTree->Branch("jetChargedMult", &jetChargedMult, "jetChargedMult/I");
-    jetTree->Branch("jetNeutralMult", &jetNeutralMult, "jetNeutralMult/I");
-    jetTree->Branch("jetMult", &jetMult, "jetMult/I");
-
-    jetTree->Branch("nPF", &nPF, "nPF/I");
-    jetTree->Branch("PF_pT", &PF_pT, "PF_pT[nPF]/F");
-    jetTree->Branch("PF_dR", &PF_dR, "PF_dR[nPF]/F");
-    jetTree->Branch("PF_dTheta", &PF_dTheta, "PF_dTheta[nPF]/F");
-    jetTree->Branch("PF_dPhi", &PF_dPhi, "PF_dPhi[nPF]/F");
-    jetTree->Branch("PF_dEta", &PF_dEta, "PF_dEta[nPF]/F");
-	jetTree->Branch("PF_phi", &PF_phi, "PF_phi[nPF]/F");
-    jetTree->Branch("PF_eta", &PF_eta, "PF_eta[nPF]/F");
-    jetTree->Branch("PF_mass", &PF_mass, "cPF_mass[nPF]/F");
-    jetTree->Branch("PF_id", &PF_id, "PF_id[nPF]/I");
-    jetTree->Branch("PF_fromPV", &PF_fromPV, "PF_fromPV[nPF]/I");
-    jetTree->Branch("PF_fromAK4Jet", &PF_fromAK4Jet, "PF_fromAK4Jet[nPF]/I");
-
-    jetTree->Branch("genJetPt", &genJetPt, "genJetPt/F");
-    jetTree->Branch("genJetEta", &genJetEta, "genJetEta/F");
-    jetTree->Branch("genJetPhi", &genJetPhi, "genJetPhi/F");
-    jetTree->Branch("genJetMass", &genJetMass, "genJetMass/F");
-
-    jetTree->Branch("nGenJetPF",&nGenJetPF,"nGenJetPF/I");
-    jetTree->Branch("genJetPF_pT", &genJetPF_pT, "genJetPF_pT[nGenJetPF]/F");
-    jetTree->Branch("genJetPF_dR", &genJetPF_dR, "genJetPF_dR[nGenJetPF]/F");
-    jetTree->Branch("genJetPF_dTheta", &genJetPF_dTheta, "genJetPF_dTheta[nGenJetPF]/F");
-	jetTree->Branch("genJetPF_phi", &genJetPF_phi, "genJetPF_phi[nGenJetPF]/F");
-	jetTree->Branch("genJetPF_eta", &genJetPF_eta, "genJetPF_eta[nGenJetPF]/F");
-    jetTree->Branch("genJetPF_mass", &genJetPF_mass, "genJetPF_mass[nGenJetPF]/F");
-    jetTree->Branch("genJetPF_id", &genJetPF_id, "genJetPF_id[nGenJetPF]/I");
-
-    jetTree->Branch("eventJetMult", &eventJetMult, "eventJetMult/I");
-    jetTree->Branch("jetPtOrder", &jetPtOrder, "jetPtOrder/I");
-
-    jetTree->Branch("dPhiJetsLO", &dPhiJetsLO, "dPhiJetsLO/F");
-    jetTree->Branch("dEtaJetsLO", &dEtaJetsLO, "dEtaJetsLO/F");
-    jetTree->Branch("alpha", &alpha, "alpha/F");
-
-    jetTree->Branch("event", &event, "event/l");
-    jetTree->Branch("run", &run, "run/I");
-    jetTree->Branch("lumi", &lumi, "lumi/I");
-
-    jetTree->Branch("pthat", &pthat, "pthat/F");
-    jetTree->Branch("eventWeight", &eventWeight, "eventWeight/F");
-
-    jetTree->Branch("rhoAll", &rhoAll, "rhoAll/F");
-    jetTree->Branch("rhoCentral", &rhoCentral, "rhoCentral/F");
-    jetTree->Branch("rhoCentralNeutral", &rhoCentralNeutral, "rhoCentralNeutral/F");
-    jetTree->Branch("rhoCentralChargedPileUp", &rhoCentralChargedPileUp, "rhoCentralChargedPileUp/F");
-    jetTree->Branch("PV_npvsGood", &PV_npvsGood, "PV_npvsGood/I");
-    jetTree->Branch("Pileup_nPU", &Pileup_nPU, "Pileup_nPU/I");
-    jetTree->Branch("Pileup_nTrueInt", &Pileup_nTrueInt, "Pileup_nTrueInt/F");
-
-    // Add descriptive comments to all of the branches
-    jetTree->GetBranch("jetPt")->SetTitle("Transverse momentum of the jet");
-    jetTree->GetBranch("jetEta")->SetTitle("Pseudorapidity of the jet");
-    jetTree->GetBranch("jetPhi")->SetTitle("Azimuthal angle of the jet");
-    jetTree->GetBranch("jetMass")->SetTitle("Mass of the jet");
-    jetTree->GetBranch("jetGirth")->SetTitle("Girth of the jet (as defined in arXiv:1106.3076 [hep-ph])");
-    jetTree->GetBranch("jetArea")->SetTitle("Catchment area of the jet; used for jet energy corrections");
-    jetTree->GetBranch("jetRawPt")->SetTitle("Transverse momentum of the jet before energy corrections");
-    jetTree->GetBranch("jetRawMass")->SetTitle("Mass of the jet before energy corrections");
-    jetTree->GetBranch("jetLooseID")->SetTitle("Indicates if the jet passes loose selection criteria; used for dismissing fake jets");
-    jetTree->GetBranch("jetTightID")->SetTitle("Indicates if the jet passes tight selection criteria; used for dismissing fake jets");
-    jetTree->GetBranch("jetGenMatch")->SetTitle("1: if a matched generator level jet exists; 0: if no match was found");
-    jetTree->GetBranch("jetQGl")->SetTitle("Quark vs Gluon likelihood discriminator");
-    jetTree->GetBranch("QG_ptD")->SetTitle("Transverse momentum distribution among particle flow candidates within the jet; defined as sqrt(Sum(pt^2))/Sum(pt), where the sum is over the particle flow candidates of the jet");
-    jetTree->GetBranch("QG_axis2")->SetTitle("Minor axis of the jet, calculated from the particle flow candidates");
-    jetTree->GetBranch("QG_mult")->SetTitle("Multiplicity of jet constituents with additional cuts: 1 GeV transverse momentum threshold for neutral particles; charged particles required to be associated with the primary interaction vertex (PF_fromPV == 3)");
-    jetTree->GetBranch("partonFlav")->SetTitle("Flavor of the jet; parton definition");
-    jetTree->GetBranch("hadronFlav")->SetTitle("Flavor of the jet; hadron definition");
-    jetTree->GetBranch("physFlav")->SetTitle("Flavor of the jet; physics definition");
-    jetTree->GetBranch("isPhysUDS")->SetTitle("Indicates a light quark jet; |physFlav| == 1, 2, 3");
-    jetTree->GetBranch("isPhysG")->SetTitle("Indicates a gluon jet; physFlav == 21");
-    jetTree->GetBranch("isPhysOther")->SetTitle("Indicates a non-light quark/gluon jet; |physFlav| != 1, 2, 3, 21");
-    jetTree->GetBranch("isPartonUDS")->SetTitle("Indicates a light quark jet; |physFlav| == 1, 2, 3");
-    jetTree->GetBranch("isPartonG")->SetTitle("Indicates a gluon jet; physFlav == 21");
-    jetTree->GetBranch("isPartonOther")->SetTitle("Indicates a non-light quark/gluon jet; |physFlav| != 1, 2, 3, 21");
-    jetTree->GetBranch("jetChargedHadronMult")->SetTitle("Multiplicity of charged hadron jet constituents");
-    jetTree->GetBranch("jetNeutralHadronMult")->SetTitle("Multiplicity of neutral hadron jet constituents");
-    jetTree->GetBranch("jetChargedMult")->SetTitle("Multiplicity of charged jet constituents");
-    jetTree->GetBranch("jetNeutralMult")->SetTitle("Multiplicity of neutral jet constituents");
-    jetTree->GetBranch("jetMult")->SetTitle("Multiplicity of jet constituents");
-    jetTree->GetBranch("nPF")->SetTitle("Number of particle flow candidates (particles reconstructed by the particle flow algorithm); contains all particles within |deltaPhi| < 1 && |deltaEta| < 1 from the center of the jet");
-    jetTree->GetBranch("PF_pT")->SetTitle("Transverse momentum of a particle flow candidate");
-    jetTree->GetBranch("PF_dR")->SetTitle("Distance of a particle flow candidate to the center of the jet");
-    jetTree->GetBranch("PF_dTheta")->SetTitle("Polar angle of a particle flow candidate");
-    jetTree->GetBranch("PF_dPhi")->SetTitle("Azimuthal angle of a particle flow candidate");
-    jetTree->GetBranch("PF_dEta")->SetTitle("Pseudorapidity of a particle flow candidate");
-    jetTree->GetBranch("PF_mass")->SetTitle("Mass of a particle flow candidate");
-    jetTree->GetBranch("PF_id")->SetTitle("Generator level particle identifier for the particle flow candidates, as defined in the PDG particle numbering scheme");
-    jetTree->GetBranch("PF_fromPV")->SetTitle("Indicates how tightly the particle is associated with the primary vertex; ranges from 3 to 0");
-    jetTree->GetBranch("PF_fromAK4Jet")->SetTitle("1: if the particle flow candidate is a constituent of the reconstructed AK4 jet; 0: if it is not a constituent of the jet");
-    jetTree->GetBranch("genJetPt")->SetTitle("Transverse momentum of the matched generator level jet");
-    jetTree->GetBranch("genJetEta")->SetTitle("Pseudorapidity of the matched generator level jet");
-    jetTree->GetBranch("genJetPhi")->SetTitle("Azimuthal angle of the matched generator level jet");
-    jetTree->GetBranch("genJetMass")->SetTitle("Mass of the matched generator level jet");
-    jetTree->GetBranch("nGenJetPF")->SetTitle("Number of particles in the matched generator level jet");
-    jetTree->GetBranch("genJetPF_pT")->SetTitle("Transverse momentum of a particle in the matched generator level jet");
-    jetTree->GetBranch("genJetPF_dR")->SetTitle("Distance of a particle to the center of the matched generator level jet ");
-    jetTree->GetBranch("genJetPF_dTheta")->SetTitle("Polar angle of a particle in the matched generator level jet");
-    jetTree->GetBranch("genJetPF_mass")->SetTitle("Mass of a particle in the matched generator level jet");
-    jetTree->GetBranch("genJetPF_id")->SetTitle("Generator level particle identifier for the particles in the matched generator level jet, as defined in the PDG particle numbering scheme");
-    jetTree->GetBranch("eventJetMult")->SetTitle("Multiplicity of jets in the event");
-    jetTree->GetBranch("jetPtOrder")->SetTitle("Indicates the ranking number of the jet, as the jets are ordered by their transverse momenta within the event");
-    jetTree->GetBranch("dPhiJetsLO")->SetTitle("Phi difference of the two leading jets");
-    jetTree->GetBranch("dEtaJetsLO")->SetTitle("Eta difference of the two leading jets");
-    jetTree->GetBranch("alpha")->SetTitle("If there are at least 3 jets in the event, alpha is the third jet's transverse momentum divided by the average transverse momentum of the two leading jets");
-    jetTree->GetBranch("event")->SetTitle("Event number");
-    jetTree->GetBranch("run")->SetTitle("Run number");
-    jetTree->GetBranch("lumi")->SetTitle("Luminosity block");
-    jetTree->GetBranch("pthat")->SetTitle("Transverse momentum of the generated hard process");
-    jetTree->GetBranch("eventWeight")->SetTitle("Monte Carlo generator weight");
-    jetTree->GetBranch("rhoAll")->SetTitle("The median density (in GeV/A) of pile-up contamination per event; computed from all PF candidates");
-    jetTree->GetBranch("rhoCentral")->SetTitle("The median density (in GeV/A) of pile-up contamination per event; computed from all PF candidates with |eta|<2.5");
-    jetTree->GetBranch("rhoCentralNeutral")->SetTitle("The median density (in GeV/A) of pile-up contamination per event; computed from all neutral PF candidates with |eta| < 2.5");
-    jetTree->GetBranch("rhoCentralChargedPileUp")->SetTitle("The median density (in GeV/A) of pile-up contamination per event; computed from all PF charged hadrons associated to pileup vertices and with |eta| < 2.5");
-    jetTree->GetBranch("PV_npvsGood")->SetTitle("The number of good reconstructed primary vertices; selection: !isFake && ndof > 4 && abs(z) <= 24 && position.Rho < 2");
-    jetTree->GetBranch("Pileup_nPU")->SetTitle("The number of pileup interactions that have been added to the event in the current bunch crossing");
-    jetTree->GetBranch("Pileup_nTrueInt")->SetTitle("The true mean number of the poisson distribution for this event from which the number of interactions in each bunch crossing has been sampled");
 
 	correctParticlesInReco=0;
 	correctParticlesNotInReco=0;
@@ -465,7 +311,7 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
         // Loop over the PF candidates contained inside the jet, first sorting them in pT order
         std::vector<reco::CandidatePtr> pfCands = j.daughterPtrVector();
-        std::cout << typeid(pfCands).name() << std::endl;
+        //std::cout << typeid(pfCands).name() << std::endl;
 		
 		std::sort(pfCands.begin(), pfCands.end(), [](const reco::CandidatePtr &p1, const reco::CandidatePtr &p2) {return p1->pt() > p2->pt(); });
         int njetpf = 0;
@@ -851,32 +697,32 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 			//std::cout << *(algorithm_output[x]) << ", " << *(algorithm_output[x]+1) << ", " << *(algorithm_output[x]+2) << ", " << *(algorithm_output[x]+3) << std::endl;
 		}
 		if(jetGenMatch==1 && matchedAlg){
+				if(executionMode == 1){
+					std::ofstream myfile;
+					myfile.open ("mlData.txt", std::ios_base::app);
 				
-				std::ofstream myfile;
-				myfile.open ("mlData.txt", std::ios_base::app);
-			
-				myfile << fullAlgPT << "\t";
-				myfile << fullAlgEta << "\t";
-				myfile << fullAlgPhi << "\t";
-				myfile << fullAlgE << "\t"; 
-			
-				myfile << rawRecoP4.pt() << "\t";
-				myfile << rawRecoP4.eta() << "\t";
-				myfile << rawRecoP4.phi() << "\t";
-				myfile << rawRecoP4.E() << "\t"; 
+					myfile << fullAlgPT << "\t";
+					myfile << fullAlgEta << "\t";
+					myfile << fullAlgPhi << "\t";
+					myfile << fullAlgE << "\t"; 
 				
-				myfile << j.pt() << "\t";
-				myfile << j.eta() << "\t";
-				myfile << j.phi() << "\t";
-				myfile << j.p4().E() << "\t"; 
-				
-				myfile << genJetPt << "\t";
-				myfile << genJetEta << "\t";
-				myfile << genJetPhi << "\t";
-				myfile << genJetE << "\n"; 
-				
-				myfile.close();
-				
+					myfile << rawRecoP4.pt() << "\t";
+					myfile << rawRecoP4.eta() << "\t";
+					myfile << rawRecoP4.phi() << "\t";
+					myfile << rawRecoP4.E() << "\t"; 
+					
+					myfile << j.pt() << "\t";
+					myfile << j.eta() << "\t";
+					myfile << j.phi() << "\t";
+					myfile << j.p4().E() << "\t"; 
+					
+					myfile << genJetPt << "\t";
+					myfile << genJetEta << "\t";
+					myfile << genJetPhi << "\t";
+					myfile << genJetE << "\n"; 
+					
+					myfile.close();
+				}
 				
 				fullAlgJetPT->Fill(fullAlgPT);
 				if(rawRecoP4.pt()>=0 and rawRecoP4.pt()<25){
@@ -899,7 +745,9 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 		}
 		
 		std::ofstream myfile;
-		myfile.open ("mlData.txt", std::ios_base::app);
+		if(executionMode == 0 || executionMode==2){
+			myfile.open ("mlData.txt", std::ios_base::app);
+		}
 		bool firstMatch=true;
 		for(unsigned int x = 0; x < nGenJetPF;x++){ 
 			int matched = 0;
@@ -923,9 +771,9 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 				}
 				
 				
-				matchDR->Fill(dR*1.0);
-				matchDPT->Fill(dPT*1.0);
-				matchDRDPT->Fill(dR*1.0, dPT*1.0);
+				//matchDR->Fill(dR*1.0);
+				//matchDPT->Fill(dPT*1.0);
+				//matchDRDPT->Fill(dR*1.0, dPT*1.0);
 				
 				
 				if(dR<0.2){
@@ -940,6 +788,10 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 			matchNumber->Fill(matched);
 			if(matched > 0){
 				matchPercent->Fill(1.0);
+				matchDR->Fill(minDR*1.0);
+                                matchDPT->Fill(minDPT*1.0);
+                                matchDRDPT->Fill(minDR*1.0, minDPT*1.0);
+
 			} else {
 				matchPercent->Fill(0.0);
 			}
@@ -951,28 +803,53 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 				matchDRPlusDPTDist->Fill(abs(1-minDPT)+minDR);
 				matchDRDPTDist->Fill(minDR, minDPT);
 				matchPTdPTDist->Fill(genJetPF_Lorentz[x].pt(), minDPT);
-				
-				/*if(firstMatch){
-					myfile << 1 << "\t";
-					firstMatch=false;
-				} else {
-					myfile << 0 << "\t";
+				if(executionMode == 0 || executionMode == 2){
+					//std::cout << "Here A" << std::endl;
+					if(firstMatch){
+						myfile << 1 << "\t";
+						firstMatch=false;
+					} else {
+						myfile << 0 << "\t";
+					}
+					
+					myfile << genJetPF_Lorentz[x].Px() << "\t";
+					myfile << genJetPF_Lorentz[x].Py() << "\t";
+					myfile << genJetPF_Lorentz[x].Pz() << "\t";
+					myfile << genJetPF_Lorentz[x].E() << "\t";
+					myfile << genJetPF_id[x] << "\t";
+					
+					myfile << PF_Lorentz[matchY].Px() << "\t";
+					myfile << PF_Lorentz[matchY].Py() << "\t";
+					myfile << PF_Lorentz[matchY].Pz() << "\t";
+					myfile << PF_Lorentz[matchY].E() << "\t";
+					myfile << PF_vx[matchY] << "\t";
+					myfile << PF_vy[matchY] << "\t";
+					myfile << PF_vz[matchY] << "\t";
+                                        
+					if(executionMode == 2){
+						//std::cout << "Here B" << std::endl;
+						myfile << PF_id[matchY] << "\t";
+						
+						myfile << rawRecoP4.pt() << "\t";						
+						myfile << rawRecoP4.eta() << "\t";
+						myfile << rawRecoP4.phi() << "\t";
+						myfile << rawRecoP4.E() << "\t";
+
+
+						myfile << j.pt() << "\t";
+        	                                myfile << j.eta() << "\t";
+                	                        myfile << j.phi() << "\t";
+                        	                myfile << j.p4().E() << "\t";
+	
+        	                                myfile << genJetPt << "\t";
+                	                        myfile << genJetEta << "\t";
+                        	                myfile << genJetPhi << "\t";
+                                	        myfile << genJetE << "\n";
+
+					} else {
+						myfile << PF_id[matchY] << "\n";
+					}
 				}
-				
-				myfile << genJetPF_Lorentz[x].Px() << "\t";
-				myfile << genJetPF_Lorentz[x].Py() << "\t";
-				myfile << genJetPF_Lorentz[x].Pz() << "\t";
-				myfile << genJetPF_Lorentz[x].E() << "\t";
-				myfile << genJetPF_id[x] << "\t";
-				
-				myfile << PF_Lorentz[matchY].Px() << "\t";
-				myfile << PF_Lorentz[matchY].Py() << "\t";
-				myfile << PF_Lorentz[matchY].Pz() << "\t";
-				myfile << PF_Lorentz[matchY].E() << "\t";
-				myfile << PF_vx[matchY] << "\t";
-				myfile << PF_vy[matchY] << "\t";
-				myfile << PF_vz[matchY] << "\t";
-				myfile << PF_id[matchY] << "\n";*/
 
 				
 			}
@@ -981,28 +858,52 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 		
 		for(unsigned int y = 0; y < nPF; y++){
 			if(recoMatch[y]==0){
-				/*if(firstMatch){
-					myfile << 1 << "\t";
-					firstMatch=false;
-				} else {
-					myfile << 0 << "\t";
+				if(executionMode == 0 || executionMode == 2){
+					if(firstMatch){
+						myfile << 1 << "\t";
+						firstMatch=false;
+					} else {
+						myfile << 0 << "\t";
+					}
+					
+					myfile << 0.0 << "\t";
+					myfile << 0.0 << "\t";
+					myfile << 0.0 << "\t";
+					myfile << 0.0 << "\t";
+					myfile << 0.0 << "\t";
+					
+					myfile << PF_Lorentz[y].Px() << "\t";
+					myfile << PF_Lorentz[y].Py() << "\t";
+					myfile << PF_Lorentz[y].Pz() << "\t";
+					myfile << PF_Lorentz[y].E() << "\t";
+					myfile << PF_vx[y] << "\t";
+					myfile << PF_vy[y] << "\t";
+					myfile << PF_vz[y] << "\t";
+					if(executionMode == 2){
+                                                myfile << PF_id[y]	<< "\t";
+                                                
+
+						myfile << rawRecoP4.pt() << "\t";
+                                                myfile << rawRecoP4.eta() << "\t";
+                                                myfile << rawRecoP4.phi() << "\t";
+                                                myfile << rawRecoP4.E() << "\t";
+
+
+						myfile << j.pt() << "\t";
+                                                myfile << j.eta() << "\t";
+                                                myfile << j.phi() << "\t";
+                                                myfile << j.p4().E() << "\t";
+
+                                                myfile << genJetPt << "\t";
+                                                myfile << genJetEta << "\t";
+                                                myfile << genJetPhi << "\t";
+                                                myfile << genJetE << "\n";
+
+                                        } else {
+                                                myfile << PF_id[y] << "\n";
+                                        }
+
 				}
-				
-				myfile << 0.0 << "\t";
-				myfile << 0.0 << "\t";
-				myfile << 0.0 << "\t";
-				myfile << 0.0 << "\t";
-				myfile << 0.0 << "\t";
-				
-				myfile << PF_Lorentz[y].Px() << "\t";
-				myfile << PF_Lorentz[y].Py() << "\t";
-				myfile << PF_Lorentz[y].Pz() << "\t";
-				myfile << PF_Lorentz[y].E() << "\t";
-				myfile << PF_vx[y] << "\t";
-				myfile << PF_vy[y] << "\t";
-				myfile << PF_vz[y] << "\t";
-				myfile << PF_id[y] << "\n";*/
-				
 				if(PF_fromAK4Jet[y] == 0){
 					incorrectParticlesNotInReco+=1;
 				} else {
@@ -1012,12 +913,12 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 			}
 		}
 		
-		
-		//myfile.close();
-		
+		if(executionMode == 0 || executionMode == 2){
+			myfile.close();
+		}
         // Save the jet in the tree
-        jetTree->Fill();
-    }
+        
+		}
 }
 
 
@@ -1045,6 +946,4 @@ void JetAnalyzer::endJob() {
 	
 	
 }
-
-
 

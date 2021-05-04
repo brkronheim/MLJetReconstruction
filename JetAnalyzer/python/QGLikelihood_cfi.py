@@ -3,7 +3,7 @@ import os
 
 qgDatabaseVersion = 'cmssw8020_v2'
 
-databasepath=os.environ['CMSSW_BASE']+'/src/JetNtupleProducerTool/JetAnalyzer/database/QGL_cmssw8020_v2.db'
+databasepath=os.environ['CMSSW_BASE']+'/src/MLJetReconstruction/JetAnalyzer/database/QGL_cmssw8020_v2.db'
 
 from CondCore.CondDB.CondDB_cfi import *
 QGPoolDBESSource = cms.ESSource("PoolDBESSource",

@@ -11,11 +11,11 @@ scram b                 # compiles the code
 cd MLJetReconstruction/JetAnalyzer
 ```
 
-## Running the code
+## Running the Mean Buildup Model
 
 The first code that should be run is the generation of the gen-reco particle matching dataset. This is done through the c++ code and can be executed as
 ```
-cmsRun python/ConfFile_cfg.py executionMode=1
+cmsRun python/ConfFile_cfg.py executionMode=0
 ```
 This tells the c++ code to use the first and smaller dataset to generate the gen-reco matches. It will save the data to mlData.txt. This should be transfered to the Python work area. Once there, run cleanParticleData.py as 
 ```
@@ -53,7 +53,7 @@ python jetCorrection.py
 ```
 Again, other options are availabe through --help
 
-After this, you can either run the code in performancePlots.ipynb with the networks trained and the data already obtained, or you can run the c++ code in executionMode=2 to obtain a test set. This code will make a plot of performance plots, though it is still giving strange results for the final correction.
+After this, you can either run the code in performancePlots.ipynb with the networks trained and the data already obtained, or you can run the c++ code in executionMode=2 to obtain a test set. This code will make a plot of performance plots.
 
 Beyond this, extractHistos.cc can be used to generate some Root Histograms showing how the matching process between gen and reco particles works, and extractHistos2.cc will make some histograms showing the algorithms performance. They are executed by running the following commands in the docker instance:
 
@@ -61,5 +61,56 @@ Beyond this, extractHistos.cc can be used to generate some Root Histograms showi
 root -b # Opens root
 .x extractHistos.cc # Runs the c++ compiler built into root, will generate the histograms
 ```
+
+Some additional plots showing the performance of this model can be seen in basicAlgRawToGenPredictionsGit.ipynb. When running it, make sure you use the name of the model you saved.
+
+## Running the Mean Direct Model
+Use the .npy file created for training the correction network. To train the network run
+```
+python rawToGen.py
+```
+
+Check the click arguments and make sure you are giving it the correct file name. Once trained, you can check its performance with basicRawToGenPredictionsGit.ipynb
+
+## Running the Distribution Direct Model
+Use the .npy file created for training the correction network. To train the network run
+```
+python rawToGenQuantile.py
+```
+
+Check the click arguments and make sure you are giving it the correct file name. Once trained, you can check its performance with quantileRawToGenPredictionsGit.ipynb
+
+## Running the Distribution Buildup Model
+Use the files created for training the first sets of regression and classification networks. To train the networks run
+```
+python jetClassificationQuantile.py
+python jetRegressionQuantile.py
+```
+In order to make a good test set run
+```
+cmsRun python/ConfFile_cfg.py executionMode=2
+```
+This tells the c++ code to use the larger dataset to generate gen-reco matches and save additional information on the gen, reco, and raw reco jets matched. It will save the data to mlData.txt. This should be transfered to the ProbabilisticPredictions folder. Once there, run cleanData.py as 
+```
+python cleanData.py --filename=filename
+```
+where filename is whatever the mlData.txt file was saved as after the transfer. Do not include the .txt ending. The data in the file will be reordered so that within each jet the particles are orderd by descending gen pt. Additionally, it will be saved in a .npy file.
+
+After this, extract the regression and classifcation networks using
+```
+python extractNetworks.py --filename=filename --regression=regression --classification=classification
+```
+Here filename is the name of the data file used to train the two networks, regression is the name of the regression network, and classification is the name of the classifcation network. This will store the weights and biases for the networks in a folder called classification and one called regression. The data contained therein should be transfered into the ProbabilisticPredictions folder. From there, dataset.py, and predict.py can be run 
+```
+python3 dataset.py
+python3 predict.py
+```
+This will make the datasets used for training the correction network. When in the same folder as jetCorrectionQuantile.py, the final trainining can be run as 
+```
+python jetCorrectionQuantile.py
+```
+Check the click arguments and make sure you are giving it the correct file name. Once trained, you can check its performance with quantileAlgRawToGenPredictionsGit.ipynb
+Additionally, make a dataset for testCluster.py in the ProbabilisticPredictions folder and run in an IDE to examine the clustering algorithm.
+
 
 View the presentations folder to see presentations on how this project has changed over time.

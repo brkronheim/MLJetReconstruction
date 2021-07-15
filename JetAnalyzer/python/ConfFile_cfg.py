@@ -43,7 +43,7 @@ elif(options.executionMode == 1 or options.executionMode == 2):
 	## Process whole data set
 	#fileNames = cms.untracked.vstring(*fileList)
 	## Process just one file
-	fileNames = cms.untracked.vstring(fileList[1])
+	fileNames = cms.untracked.vstring(fileList[0:21])#[20:21])
     )
 else:
     process.source = cms.Source("PoolSource",
@@ -57,7 +57,7 @@ else:
 
 process.AK4jets = cms.EDAnalyzer("JetAnalyzer",
 	## jet, PF and generator level collections ##
-	jets = cms.InputTag("slimmedJets"),
+	jets = cms.InputTag("slimmedJetsPuppi"),
 	pfCands = cms.InputTag("packedPFCandidates"),
 	genJets = cms.InputTag("slimmedGenJets"),
 	genEventInfo = cms.InputTag("generator"),

@@ -149,9 +149,15 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     vector<JetIndexed> selectedJets;
 
     // Loop over the jets to save them to the jet vectors for pT-ordering
+    //std::cout << "Here A" << std::endl;
     int iJetR = -1;
     for(pat::JetCollection::const_iterator jetIt = jets->begin(); jetIt!=jets->end(); ++jetIt) {
         const pat::Jet &jet = *jetIt;
+        std::vector<std::string> jec = jet.availableJECSets();
+        //for (std::vector<std::string>::const_iterator i = jec.begin(); i != jec.end(); ++i)
+        //	std::cout << *i << std::endl;        
+
+        //std::cout << std::endl;
         ++iJetR;
         sortedJets.push_back( JetIndexed( jet, iJetR) );
         // Select
@@ -159,16 +165,20 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 			selectedJets.push_back( JetIndexed( jet, iJetR) );
         }
     }
+    //std::cout << "Here B" << std::endl;
 
     // Sort the jets in pT order
     std::sort(sortedJets.begin(), sortedJets.end(), higher_pT_sort());
     std::sort(selectedJets.begin(), selectedJets.end(), higher_pT_sort());
 
 
-	math::XYZTLorentzVector rawRecoP4(0,0,0,0);
-
+    //math::XYZTLorentzVector rawRecoP4(0,0,0,0);
+    //std::cout << "Here C" << std::endl;
     // Loop over the pT-ordered selected jets and save them to file
     for (unsigned int ptIdx = 0; ptIdx < selectedJets.size(); ++ptIdx) {
+        math::XYZTLorentzVector rawRecoP4(0,0,0,0);
+
+        //std::cout << "Here D" << std::endl;
         // Make selective cuts on the event level
         if (sortedJets.size() < 2) continue;
         //if (fabs(sortedJets[0].jet.eta()) > 2.5 || fabs(sortedJets[1].jet.eta()) > 2.5) continue;
@@ -212,10 +222,12 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
                 jetTightID = 1;
             }
         }
-
+        //std::cout << "Here E" << std::endl;
         // Add variables for deltaPhi and deltaEta for the two leading jets of the event
         dPhiJetsLO = deltaPhi(sortedJets[0].jet.phi(), sortedJets[1].jet.phi());
         dEtaJetsLO = sortedJets[0].jet.eta() - sortedJets[1].jet.eta();
+        //std::cout << "Here E1" << std::endl;
+
 
         // The alpha variable is the third jet's pT divided by the average of the two leading jets' pT
         alpha = 0;
@@ -224,6 +236,7 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
                 Float_t leadingPtAvg = (sortedJets[0].jet.pt() + sortedJets[1].jet.pt()) * 0.5;
                 alpha = sortedJets[2].jet.pt() / leadingPtAvg;
         }
+        //std::cout << "Here E2" << std::endl;
 
         // Assign flavors for each jet using three different flavor definitions
         partonFlav = j.partonFlavour();
@@ -231,6 +244,7 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
         physFlav = 0;
         if (j.genParton()) physFlav = j.genParton()->pdgId();
+        //std::cout << "Here E3" << std::endl;
 
         // For convenience, save variables distinguishing gluon, light quark and other jets
         isPartonUDS = 0;
@@ -248,6 +262,7 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         } else {
             isPhysOther = 1;
         }
+        //std::cout << "Here E4" << std::endl;
 
         // Parton definition for flavors
         if(abs(partonFlav) == 1 || abs(partonFlav) == 2 || abs(partonFlav) == 3) {
@@ -257,21 +272,23 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         } else {
             isPartonOther = 1;
         }
+        //std::cout << "Here E5" << std::endl;
 
         // Quark-gluon likelihood variables
         edm::RefToBase<pat::Jet> jetRef(edm::Ref<pat::JetCollection>(jets, iJetRef));
-        jetQGl = (*qglHandle)[jetRef];
-        QG_ptD = (*ptDHandle)[jetRef];
-        QG_axis2 = (*axis2Handle)[jetRef];
-        QG_mult = (*multHandle)[jetRef];
+        //jetQGl = (*qglHandle)[jetRef];
+        //QG_ptD = (*ptDHandle)[jetRef];
+        //QG_axis2 = (*axis2Handle)[jetRef];
+        //QG_mult = (*multHandle)[jetRef];
 
         // Add event information to the jet-based tree
         event = iEvent.id().event();
         run = iEvent.id().run();
         lumi = iEvent.id().luminosityBlock();
+        //std::cout << "Here E6" << std::endl;
 
         eventJetMult = selectedJets.size();
-
+        //std::cout << "Here F" << std::endl;
         // MC variables
         pthat = -1;
         if (genEventInfo->hasBinningValues()) {
@@ -323,15 +340,18 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         jetGirth = 0;
 		nPFR = 0;
         unsigned int pfCandsSize = pfCands.size();
+        //std::cout << "Here G" << std::endl;
         for (unsigned int i = 0; i < pfCandsSize; ++i) {
             const pat::PackedCandidate &pf = dynamic_cast<const pat::PackedCandidate &>(*pfCands[i]);
             const pat::PackedCandidate* pfPointer = &pf;
             pfMap.insert(std::pair <const pat::PackedCandidate*, const pat::PackedCandidate> (pfPointer, pf));
 
 			int pdgIDReco = pf.pdgId();
-				
-			rawRecoP4 += pf.p4();
-				
+			//std::cout << pf.p4() << std::endl;
+			//std::cout << pf.p4()*pf.puppiWeightNoLep() << std::endl;
+			//std::cout << std::endl;	
+			rawRecoP4 += pf.p4()*pf.puppiWeightNoLep();
+			
 			//std::cout << pf.px() << std::endl;
 			
 			PFR_matrix[nPFR] [0]= pf.pt();
@@ -394,9 +414,10 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
             jetGirth += sqrt(dY*dY + dPhi*dPhi) * pf.pt()/j.pt();
             ++njetpf;
         }
+        //std::cout << rawRecoP4 << std::endl;
         jetMult = njetpf;
-
-		int jetCount = constructJets.run(&algorithm_data[0], nPFR, &algorithm_output[0]);
+		int jetCount = 1;
+		//int jetCount = constructJets.run(&algorithm_data[0], nPFR, &algorithm_output[0]);
 		//std::cout << jetCount << " jets found from "<< nPFR << " particles" << std::endl;
 
 		//for(int x =0; x<std::min(jetCount,5); x++){
@@ -421,6 +442,7 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 		float AlgPT = -10000;
 
         // Check if the jet has a matching generator level jet
+        //std::cout << "Here J" << std::endl;
         if(j.genJet()) {
             jetGenMatch = 1;
             const reco::GenJet* gj = j.genJet();
@@ -503,7 +525,7 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
             // Sort the constituents in pT order
             std::sort(genParticles.begin(), genParticles.end(), [](const pat::PackedGenParticle* p1, const pat::PackedGenParticle* p2) {return p1->pt() > p2->pt(); });
-
+            //std::cout << "Here K" << std::endl;
             unsigned int genParticlesSize = genParticles.size();
 			genNumber->Fill(genParticlesSize);
             for (unsigned int i = 0; i != genParticlesSize; ++i) {
@@ -530,7 +552,7 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
             }
             nGenJetPF = ng;
         }
-
+        //std::cout << "Here L" << std::endl;
         // Loop over all the PF candidates in an event and save those which are
         //  within the area of |deltaEta| < 1 & |deltaPhi| < 1 from the center of the jet
         if (!(kMaxPF < pfs->size()))
@@ -667,8 +689,8 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         nPF = npfs;
 		
 
-		
-		jetCount = constructJets.run(&algorithm_data[0], nPFR, &algorithm_output[0]);
+		jetCount = 1;
+		//jetCount = constructJets.run(&algorithm_data[0], nPFR, &algorithm_output[0]);
 		//std::cout << jetCount << " jets found from "<< nPFR << " particles" << std::endl;
 
 		float fullAlgdR = 100;
@@ -709,17 +731,17 @@ void JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 					myfile << rawRecoP4.pt() << "\t";
 					myfile << rawRecoP4.eta() << "\t";
 					myfile << rawRecoP4.phi() << "\t";
-					myfile << rawRecoP4.E() << "\t"; 
+					myfile << rawRecoP4.M() << "\t"; 
 					
 					myfile << j.pt() << "\t";
 					myfile << j.eta() << "\t";
 					myfile << j.phi() << "\t";
-					myfile << j.p4().E() << "\t"; 
+					myfile << j.p4().M() << "\t"; 
 					
 					myfile << genJetPt << "\t";
 					myfile << genJetEta << "\t";
 					myfile << genJetPhi << "\t";
-					myfile << genJetE << "\n"; 
+					myfile << genJetMass << "\n"; 
 					
 					myfile.close();
 				}

@@ -17,30 +17,27 @@ At the same level as this README in the repository is a file quantileNetwork.py.
 ## QuantileNetwork File
 
 Inside of quantileNet.py is the code for the actual QuantileNet object, as well as three additional functions. When training a model, the first of these to use is the helper function make_dataset. This function accepts the following:
-	input_vals: inputs to the network
-    output_vals: outputs of the network
-    input_dims: dimension of input data
-    output_dims: dimension of output data
-    samples: number of training examples
+- input_vals: inputs to the network
+- output_vals: outputs of the network
+- input_dims: dimension of input data
+- output_dims: dimension of output data
+- samples: number of training examples
+
 
 It returns:
-	dset_in: the new input dataset
-    dset_out: the new output dataset
+- dset_in: the new input dataset
+- dset_out: the new output dataset
     
 This function turns typical machine learning training sets into a quantile one. This function turns a typical input, output dataset into a dataset of the following input form:
 (input, one hot encoding of output dim to predict, output dims already predicted, zero padding)
 
 After this comes the actual QuantileNet object. The constructor contains three inputs:
 	
-	grad_loss_scale: value to scale the graident loss scle. The gradient
+- grad_loss_scale: value to scale the graident loss scle. The gradient
 		loss comes from negative slopes from the quantile function, 
 		default is 100
-	network_type: if this is 'normalizing' the network learns two
-		approximations to the quanilte function, one with no normalization
-		to set the scale for the other approxiamtion, default is '
-		normalizing'
-	clip: distance from 1 and -1 beyond which the prediction value is
-		fixed, defautl is 1e-7
+- network_type: if this is 'normalizing' the network learns two approximations to the quanilte function, one with no normalization to set the scale for the other approxiamtion, default is 'normalizing'
+- clip: distance from 1 and -1 beyond which the prediction value is fixed, defautl is 1e-7
 
 After initializing the network, simply call the add function, which merely adds the given layer to the network. An example is given below.
 ```
@@ -65,41 +62,34 @@ new_model = tf.keras.models.load_model(model_name,
 ``` 
 
 Once a network has been loaded there are two options with which predictions can be made. The first simply accepts a set of inputs and generates the requested number of samples that correspond to the output distribution. Note that the make_dataset function does not have to be used for either of these. This is the sample_net function. It accepts the following inputs:
-    quantile_object : The quantile network object
-    quantile_samples : The number of samples to take for each input
-    inputs : Input data
-    input_count : Number of examples
-    input_dims : Dimension of input data
-    output_dims : Dimension of output distribution
-    network_type: if this is 'normalizing' the network learns two
-        approximations to the quanilte function, one with no normalization
-        to set the scale for the other approxiamtion, defualt is '
-		'normalizing'
-    clip: distance from 1 and -1 beyond which the prediction value is
-        fixed, default is 1e-7
+- quantile_object : The quantile network object
+- quantile_samples : The number of samples to take for each input
+- inputs : Input data
+- input_count : Number of examples
+- input_dims : Dimension of input data
+- output_dims : Dimension of output distribution
+- network_type: if this is 'normalizing' the network learns two approximations to the quanilte function, one with no normalization to set the scale for the other approxiamtion, defualt is normalizing'
+- clip: distance from 1 and -1 beyond which the prediction value is fixed, default is 1e-7
+
 And it returns the follwoing output:
-    output : The output of the quantile net. It has shape
-        (input_count, quantile_samples, output_dims)
+- output : The output of the quantile net. It has shape (input_count, quantile_samples, output_dims)
 
 The other option for predictions, predict_dist, accepts as input a list of quantiles, a set of inputs, the current dimension of the output being predicted, and any previously sampled output values. It then returns data which can be used to construction the quantile function, cdf, and pdf for the output distribution. The inputs it accepts are:
-	quantile_object : The quantile network object
-    quantiles : quantiles at which to calculate the pdf and cdf
-    inputs : Input data
-    input_count : Number of examples
-    current_dim : The output dimension at which to calculate the pdf and cdf
-    input_dims : Dimension of input data
-    output_dims : Dimension of output distribution
-    network_type : if this is 'normalizing' the network learns two
-        approximations to the quanilte function, one with no normalization
-        to set the scale for the other approxiamtion, default is 'normalizing'
-    clip : distance from 1 and -1 beyond which the prediction value is
-        fixed, default is 1e-7
-    previous_samples : values for previously sampled dimensions, default is 
-		None
+- quantile_object : The quantile network object
+- quantiles : quantiles at which to calculate the pdf and cdf
+- inputs : Input data
+- input_count : Number of examples
+- current_dim : The output dimension at which to calculate the pdf and cdf
+- input_dims : Dimension of input data
+- output_dims : Dimension of output distribution
+- network_type : if this is 'normalizing' the network learns two approximations to the quanilte function, one with no normalization to set the scale for the other approxiamtion, default is 'normalizing'
+- clip : distance from 1 and -1 beyond which the prediction value is fixed, default is 1e-7
+- previous_samples : values for previously sampled dimensions, default is None
+
 It returns:
-    cdf : The values of the distribution associated with the quantiles
-    pdf : The probabilities of the quantile values
-    quantiles : Same as the input quantiles
+- cdf : The values of the distribution associated with the quantiles
+- pdf : The probabilities of the quantile values
+- quantiles : Same as the input quantiles
 	
 An example use case is the following:
 ```
